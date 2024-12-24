@@ -26,10 +26,4 @@ jobs:
 
       - name: Run RSS Generator Script
         run: |
-          python website_to_rss.py
-
-      - name: Upload RSS JSON
-        uses: actions/upload-artifact@v3
-        with:
-          name: bundle_rss
-          path: bundle_rss.json
+          python website2rss.py

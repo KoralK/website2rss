@@ -3,7 +3,7 @@ name: Generate RSS Bundle and Send to Webhook
 on:
   schedule:
     - cron: '0 * * * *' # Run every hour
-  workflow_dispatch:
+  workflow_dispatch: # Allow manual trigger
 
 jobs:
   run-script:
@@ -23,6 +23,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install beautifulsoup4 requests
 
-      - name: Run RSS Generator and Send to Webhook
+      - name: Run RSS Generator Script
         run: |
           python website2rss.py

@@ -68,6 +68,23 @@ def save_bundle_rss_json(json_data, filename):
     except IOError as e:
         print(f"Error saving RSS feed bundle: {e}")
 
+def load_previous_json(filename):
+    """Load the previous JSON data from a file."""
+    if not os.path.exists(filename):
+        return None
+    with open(filename, 'r', encoding='utf-8') as file:
+        return json.load(file)
+
+def send_to_webhook(json_data, webhook_url):
+    """Send the JSON data to the specified webhook."""
+    try:
+        headers = {'Content-Type': 'application/json'}
+        response = requests.post(webhook_url, data=json_data, headers=headers)
+        response.raise_for_status()
+        print(f"Successfully sent data to webhook: {webhook_url}")
+    except requests.RequestException as e:
+        print(f"Failed to send data to webhook {webhook_url}: {e}")
+
 if __name__ == "__main__":
     urls = [
         "https://blog.ring.com/category/products-innovation/",
@@ -81,7 +98,19 @@ if __name__ == "__main__":
         "https://blog.google/products/google-nest/"
     ]
 
-    bundle_rss_json = generate_bundle_rss_json(urls)
-    save_bundle_rss_json(bundle_rss_json, "bundle_rss.json")
-    print("Generated Bundle RSS Feed JSON:")
-    print(bundle_rss_json)
+    webhook_url = "https://hook.eu2.make.com/p2wgupm5jatdce1va0hw745ofdyojrgx"
+    last_json_file = "last_bundle_rss.json"
+
+    # Generate new RSS JSON
+    new_data = json.loads(generate_bundle_rss_json(urls))
+
+    # Load the previous JSON
+    old_data = load_previous_json(last_json_file)
+
+    # Compare and send if new data exists
+    if new_data != old_data:
+        print("New data detected. Sending to webhook...")
+        send_to_webhook(json.dumps(new_data, indent=4), webhook_url)
+        save_bundle_rss_json(json.dumps(new_data, indent=4), last_json_file)
+    else:
+        print("No new data. Skipping webhook notification.")

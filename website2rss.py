@@ -99,6 +99,7 @@ if __name__ == "__main__":
     ]
 
     webhook_url = "https://hook.eu2.make.com/p2wgupm5jatdce1va0hw745ofdyojrgx"
+    output_json_file = "bundle_rss.json"  # Ensure correct file naming
     last_json_file = "last_bundle_rss.json"
 
     # Generate new RSS JSON
@@ -111,6 +112,8 @@ if __name__ == "__main__":
     if new_data != old_data:
         print("New data detected. Sending to webhook...")
         send_to_webhook(json.dumps(new_data, indent=4), webhook_url)
-        save_bundle_rss_json(json.dumps(new_data, indent=4), last_json_file)
+        save_bundle_rss_json(json.dumps(new_data, indent=4), output_json_file)  # Save as bundle_rss.json
+        save_bundle_rss_json(json.dumps(new_data, indent=4), last_json_file)  # Save last JSON for future comparisons
     else:
         print("No new data. Skipping webhook notification.")
+

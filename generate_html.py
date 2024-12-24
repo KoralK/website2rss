@@ -26,7 +26,7 @@ def generate_dynamic_html(json_data, api_key):
 
 if __name__ == "__main__":
     try:
-        with open("bundle_rss.json", "r") as json_file:
+        with open("bundle_rss.json", "r") as json_file:  # Use the updated file name
             json_data = json.load(json_file)
 
         # Replace with your OpenAI API key
@@ -42,3 +42,4 @@ if __name__ == "__main__":
         print("Dynamic HTML generated and saved as smart_home_news.html.")
     except FileNotFoundError:
         print("Error: 'bundle_rss.json' not found. Ensure the RSS generation step completed successfully.")
+

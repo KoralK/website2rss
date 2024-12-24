@@ -30,7 +30,7 @@ jobs:
       - name: List Files in Workspace (Debugging Step)
         run: |
           ls -la
-
+          
       - name: Generate Dynamic HTML
         run: |
           python generate_html.py

@@ -17,16 +17,19 @@ def generate_dynamic_html(json_data, api_key):
     Output both the HTML and inline CSS.
     """
 
-    response = openai.ChatCompletion.create(
-        model="gpt-4",  # Use GPT-4 or GPT-3.5-turbo
-        messages=[
-            {"role": "system", "content": "You are a helpful assistant that generates HTML code."},
-            {"role": "user", "content": prompt}
-        ],
-        max_tokens=2000
-    )
-
-    return response["choices"][0]["message"]["content"]
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-4",  # Use GPT-4 or GPT-3.5-turbo
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant that generates HTML code."},
+                {"role": "user", "content": prompt}
+            ],
+            max_tokens=2000
+        )
+        return response["choices"][0]["message"]["content"]
+    except openai.error.OpenAIError as e:
+        print(f"OpenAI API Error: {e}")
+        raise
 
 if __name__ == "__main__":
     try:
@@ -37,7 +40,7 @@ if __name__ == "__main__":
         # Retrieve the API key from the environment
         openai_api_key = os.getenv("OPENAI_API_KEY")
         if not openai_api_key:
-            raise ValueError("OPENAI_API_KEY is not set")
+            raise ValueError("OPENAI_API_KEY is not set in the environment.")
 
         # Generate the HTML
         dynamic_html = generate_dynamic_html(json_data, openai_api_key)
@@ -51,3 +54,5 @@ if __name__ == "__main__":
         print("Error: 'bundle_rss.json' not found. Ensure the RSS generation step completed successfully.")
     except openai.error.OpenAIError as e:
         print(f"OpenAI API Error: {e}")
+    except Exception as e:
+        print(f"Unexpected error: {e}")

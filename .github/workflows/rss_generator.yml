@@ -1,9 +1,9 @@
 name: Generate RSS and Dynamic HTML
 
 on:
-  schedule:
-    - cron: '0 * * * *' # Run every hour
-  workflow_dispatch:
+  # schedule:
+  #   - cron: '0 * * * *' # Disabled interval
+  workflow_dispatch: # Only allow manual triggering
 
 jobs:
   run-scripts:

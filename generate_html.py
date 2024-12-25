@@ -27,9 +27,9 @@ def generate_dynamic_html(json_data, api_key):
             temperature=0.7,
             max_tokens=2000
         )
-        return response["choices"][0]["message"]["content"]
-    except Exception as e:
-        print(f"Error generating HTML: {e}")
+        return response.choices[0].message["content"]
+    except openai.error.OpenAIError as e:
+        print(f"OpenAI API Error: {e}")
         raise
 
 if __name__ == "__main__":

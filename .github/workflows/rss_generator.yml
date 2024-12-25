@@ -1,16 +1,16 @@
 name: Website to RSS and HTML Generator
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: '0 * * * *'  # Runs every hour
-  workflow_dispatch:  # Allows manual trigger
 
 jobs:
-  generate-and-push:
+  generate-and-post:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the code
+      # Step 1: Checkout the repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
@@ -26,18 +26,18 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # Step 4: Run the RSS generator
+      # Step 4: Run the RSS generator script
       - name: Generate RSS JSON
         run: python website2rss.py
 
-      # Step 5: Generate Dynamic HTML and Post to Blogger
-      - name: Generate Dynamic HTML and Post to Blogger
+      # Step 5: Generate HTML and post to Blogger
+      - name: Generate HTML and Post to Blogger
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           BLOGGER_API_KEY: ${{ secrets.BLOGGER_API_KEY }}
-        run: python generate_html.py
+        run: python generate_dynamic_html.py
 
-      # Step 6: Upload HTML artifact (optional for manual review)
+      # Step 6: Upload the HTML artifact (optional)
       - name: Upload HTML artifact
         uses: actions/upload-artifact@v3
         with:

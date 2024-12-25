@@ -6,16 +6,17 @@ def generate_dynamic_html(json_data, api_key):
     openai.api_key = api_key
 
     prompt = f"""
-    You are tasked with creating a dynamic HTML page about smart home devices. Here's the JSON data with news articles:
-    {json.dumps(json_data, indent=4)}
+        You are tasked with creating a dynamic HTML page about smart home devices. Here's the filtered JSON data with news articles:
+        {json.dumps(json_data, indent=4)}
 
-    Create an HTML page with:
-    - A header that says 'Latest Smart Home Device News'
-    - A list of articles with their titles as clickable links, descriptions, and publication sources.
-    - A responsive and mobile-friendly design using inline CSS.
+        Create an HTML page with:
+        - A header that says 'Latest Smart Home Device News'
+        - A list of articles with their titles as clickable links, descriptions, and publication sources.
+        - A responsive and mobile-friendly design using inline CSS.
 
-    Output both the HTML and inline CSS.
-    """
+        Output both the HTML and inline CSS.
+        """
+
 
     try:
         response = openai.ChatCompletion.create(
@@ -38,13 +39,19 @@ if __name__ == "__main__":
         with open("bundle_rss.json", "r") as json_file:
             json_data = json.load(json_file)
 
+        # Filter JSON data for smart home devices
+        filtered_data = filter_smart_home_data(json_data)
+
+        if not filtered_data:
+            raise ValueError("No relevant smart home data found in the JSON.")
+
         # Retrieve the API key from the environment
         openai_api_key = os.getenv("OPENAI_API_KEY")
         if not openai_api_key:
             raise ValueError("OPENAI_API_KEY is not set in the environment.")
 
-        # Generate the HTML
-        dynamic_html = generate_dynamic_html(json_data, openai_api_key)
+        # Generate the HTML using filtered data
+        dynamic_html = generate_dynamic_html(filtered_data, openai_api_key)
 
         # Save the HTML to a file
         with open("smart_home_news.html", "w") as html_file:
@@ -53,5 +60,7 @@ if __name__ == "__main__":
         print("Dynamic HTML generated and saved as smart_home_news.html.")
     except FileNotFoundError:
         print("Error: 'bundle_rss.json' not found. Ensure the RSS generation step completed successfully.")
+    except ValueError as ve:
+        print(f"Error: {ve}")
     except Exception as e:
         print(f"Unexpected error: {e}")

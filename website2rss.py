@@ -85,6 +85,23 @@ def send_to_webhook(json_data, webhook_url):
     except requests.RequestException as e:
         print(f"Failed to send data to webhook {webhook_url}: {e}")
 
+def filter_smart_home_data(json_data):
+    """
+    Filter JSON data to include only articles related to smart home devices.
+    """
+    keywords = ["smart home", "device", "automation", "IoT", "home security", "smart hub"]
+    filtered_data = {}
+
+    for source, articles in json_data.items():
+        relevant_articles = [
+            article for article in articles
+            if any(keyword.lower() in article["title"].lower() for keyword in keywords)
+        ]
+        if relevant_articles:
+            filtered_data[source] = relevant_articles
+
+    return filtered_data
+
 if __name__ == "__main__":
     urls = [
         "https://blog.ring.com/category/products-innovation/",
@@ -99,21 +116,21 @@ if __name__ == "__main__":
     ]
 
     webhook_url = "https://hook.eu2.make.com/p2wgupm5jatdce1va0hw745ofdyojrgx"
-    output_json_file = "bundle_rss.json"  # Ensure correct file naming
     last_json_file = "last_bundle_rss.json"
 
     # Generate new RSS JSON
     new_data = json.loads(generate_bundle_rss_json(urls))
 
+    # Filter JSON data for smart home devices
+    filtered_data = filter_smart_home_data(new_data)
+
     # Load the previous JSON
     old_data = load_previous_json(last_json_file)
 
     # Compare and send if new data exists
-    if new_data != old_data:
+    if filtered_data != old_data:
         print("New data detected. Sending to webhook...")
-        send_to_webhook(json.dumps(new_data, indent=4), webhook_url)
-        save_bundle_rss_json(json.dumps(new_data, indent=4), output_json_file)  # Save as bundle_rss.json
-        save_bundle_rss_json(json.dumps(new_data, indent=4), last_json_file)  # Save last JSON for future comparisons
+        send_to_webhook(json.dumps(filtered_data, indent=4), webhook_url)
+        save_bundle_rss_json(json.dumps(filtered_data, indent=4), last_json_file)
     else:
         print("No new data. Skipping webhook notification.")
-

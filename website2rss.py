@@ -116,7 +116,7 @@ if __name__ == "__main__":
     ]
 
     webhook_url = "https://hook.eu2.make.com/p2wgupm5jatdce1va0hw745ofdyojrgx"
-    last_json_file = "last_bundle_rss.json"
+    last_json_file = "bundle_rss.json"
 
     # Generate new RSS JSON
     new_data = json.loads(generate_bundle_rss_json(urls))

@@ -30,6 +30,18 @@ jobs:
       - name: Generate RSS JSON
         run: python website2rss.py
 
+      - name: List directory contents after running website2rss.py
+        run: ls -l
+        shell: bash
+
+      - name: Check if bundle_rss.json exists
+        run: |
+          if [ ! -f bundle_rss.json ]; then
+            echo "Error: bundle_rss.json not found."
+            exit 1
+          fi
+        shell: bash
+
       # Step 5: Generate HTML and post to Blogger
       - name: Generate HTML and Post to Blogger
         env:

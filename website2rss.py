@@ -131,6 +131,6 @@ if __name__ == "__main__":
     if filtered_data != old_data:
         print("New data detected. Sending to webhook...")
         send_to_webhook(json.dumps(filtered_data, indent=4), webhook_url)
-        save_bundle_rss_json(json.dumps(filtered_data, indent=4), last_json_file)
+        save_bundle_rss_json(json.dumps(filtered_data, indent=4), "bundle_rss.json")
     else:
         print("No new data. Skipping webhook notification.")

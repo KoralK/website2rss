@@ -24,11 +24,12 @@ def generate_dynamic_html(json_data, api_key):
                 {"role": "system", "content": "You are a helpful assistant that generates HTML code."},
                 {"role": "user", "content": prompt}
             ],
+            temperature=0.7,
             max_tokens=2000
         )
         return response["choices"][0]["message"]["content"]
-    except openai.error.OpenAIError as e:
-        print(f"OpenAI API Error: {e}")
+    except Exception as e:
+        print(f"Error generating HTML: {e}")
         raise
 
 if __name__ == "__main__":
@@ -52,7 +53,5 @@ if __name__ == "__main__":
         print("Dynamic HTML generated and saved as smart_home_news.html.")
     except FileNotFoundError:
         print("Error: 'bundle_rss.json' not found. Ensure the RSS generation step completed successfully.")
-    except openai.error.OpenAIError as e:
-        print(f"OpenAI API Error: {e}")
     except Exception as e:
         print(f"Unexpected error: {e}")

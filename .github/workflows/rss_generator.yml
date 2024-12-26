@@ -1,57 +1,42 @@
-name: Website to RSS and HTML Generator
+name: Generate and Post to Blogger
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
   schedule:
-    - cron: '0 * * * *'  # Runs every hour
+    - cron: "0 * * * *" # Run every hour
 
 jobs:
   generate-and-post:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the repository
-      - name: Checkout repository
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      # Step 2: Set up Python
-      - name: Set up Python 3.9
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.9
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.9"
 
-      # Step 3: Install dependencies
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
 
-      # Step 4: Run the RSS generator script
-      - name: Generate RSS JSON
-        run: python website2rss.py
+    - name: Generate HTML and Post to Blogger
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        BLOGGER_API_KEY: ${{ secrets.BLOGGER_API_KEY }}
+      run: |
+        python website2rss.py
+        python generate_dynamic_html.py
+        python post_to_blogger.py
 
-      - name: List directory contents after running website2rss.py
-        run: ls -l
-        shell: bash
-
-      - name: Check if bundle_rss.json exists
-        run: |
-          if [ ! -f bundle_rss.json ]; then
-            echo "Error: bundle_rss.json not found."
-            exit 1
-          fi
-        shell: bash
-
-      # Step 5: Generate HTML and post to Blogger
-      - name: Generate HTML and Post to Blogger
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          BLOGGER_API_KEY: ${{ secrets.BLOGGER_API_KEY }}
-        run: python generate_dynamic_html.py
-
-      # Step 6: Upload the HTML artifact (optional)
-      - name: Upload HTML artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: smart-home-news
-          path: smart_home_news.html
+    - name: Upload HTML artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: smart-home-news
+        path: smart_home_news.html

@@ -23,6 +23,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Run website2rss script
+        run: python website2rss.py
+
+      - name: Debug file listing
+        run: ls -la
+
       - name: Verify bundle_rss.json exists
         run: |
           if [ ! -f bundle_rss.json ]; then

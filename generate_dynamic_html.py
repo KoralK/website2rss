@@ -1,12 +1,26 @@
 import json
 import os
 import requests
+import time
+from requests.adapters import HTTPAdapter
+from urllib3.util import Retry
 
-def generate_dynamic_html(json_data, api_key):
+def generate_dynamic_html(json_data, api_key, verify_ssl=True, max_retries=3):
     """
-    Generates dynamic HTML content using the Gemmini 2 Flash API.
+    Generates dynamic HTML content using the Gemmini 2 Flash API with retries.
+
+    Args:
+        json_data (dict): JSON data for HTML generation.
+        api_key (str): The Gemmini API key.
+        verify_ssl (bool, optional): Whether to verify SSL certificate. Defaults to True.
+        max_retries (int, optional): Maximum number of retries. Defaults to 3.
+
+    Returns:
+       str: The generated HTML content.
+    Raises:
+        requests.exceptions.RequestException: if all retries fail.
     """
-    api_url = "https://api.gemmini2flash.com/v1/generate-html"  # Replace with actual Gemmini 2 Flash API endpoint
+    api_url = "https://api.gemmini2flash.com/v1/generate-html"
     headers = {
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",
@@ -17,16 +31,39 @@ def generate_dynamic_html(json_data, api_key):
         "prompt": "Generate a dynamic HTML page for smart home device news with a responsive design.",
     }
 
-    try:
-        response = requests.post(api_url, headers=headers, json=payload)
-        response.raise_for_status()
-        return response.json()["html"]  # Adjust based on the actual response format
-    except requests.exceptions.HTTPError as e:
-        print(f"HTTP Error: {e.response.status_code} - {e.response.text}")
-        raise
-    except Exception as e:
-        print(f"Unexpected error: {e}")
-        raise
+    retry_strategy = Retry(
+    total=max_retries,
+    status_forcelist=[429, 500, 502, 503, 504],
+    backoff_factor=1, # Adjust backoff time
+    )
+    adapter = HTTPAdapter(max_retries=retry_strategy)
+    http = requests.Session()
+    http.mount("https://", adapter)
+
+
+    for attempt in range(max_retries + 1):
+        try:
+            response = http.post(api_url, headers=headers, json=payload, verify=verify_ssl)
+            response.raise_for_status()
+            return response.json()["html"]  # Adjust based on the actual response format
+
+        except requests.exceptions.HTTPError as e:
+            print(f"HTTP Error (Attempt {attempt+1}/{max_retries+1}): {e.response.status_code} - {e.response.text}")
+            if e.response.status_code not in [429,500,502,503,504]:
+                raise # if non-retriable error, then raise
+            if attempt == max_retries:
+                raise
+        except requests.exceptions.RequestException as e:
+           print(f"Request Exception (Attempt {attempt+1}/{max_retries+1}): {e}")
+           if attempt == max_retries:
+                raise
+        except Exception as e:
+            print(f"Unexpected error (Attempt {attempt+1}/{max_retries+1}): {e}")
+            if attempt == max_retries:
+                raise
+
+        if attempt < max_retries:
+            time.sleep(2**attempt) # Exponential backoff before retrying
 
 if __name__ == "__main__":
     try:
@@ -40,10 +77,13 @@ if __name__ == "__main__":
         gemmini_api_key = os.getenv("GEMMINI_FLASH_API_KEY")
         if not gemmini_api_key:
             raise ValueError("GEMMINI_FLASH_API_KEY is not set in the environment.")
+        
+        # Determine whether to verify SSL certificates (example using env variable)
+        verify_ssl_certs = os.getenv("VERIFY_SSL_CERTS", "true").lower() == "true"
 
         # Generate the HTML
         print("Generating HTML...")
-        dynamic_html = generate_dynamic_html(json_data, gemmini_api_key)
+        dynamic_html = generate_dynamic_html(json_data, gemmini_api_key, verify_ssl=verify_ssl_certs)
 
         # Save the HTML to a file
         html_file_name = "smart_home_news.html"

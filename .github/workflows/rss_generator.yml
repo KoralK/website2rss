@@ -17,6 +17,12 @@ jobs:
         uses: actions/setup-python@v3
         with:
           python-version: "3.9"
+      
+      - name: Test network connectivity
+        run: curl -v https://www.google.com
+
+      - name: Test DNS resolution
+        run: nslookup api.gemmini2flash.com
 
       - name: Install dependencies
         run: |

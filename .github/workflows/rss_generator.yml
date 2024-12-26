@@ -1,56 +1,49 @@
-name: RSS Generator Workflow
+name: Generate RSS and HTML
 
 on:
   push:
     branches:
       - main
-  schedule:
-    - cron: '0 * * * *'
 
 jobs:
   generate_rss:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v3
-      with:
-        python-version: '3.9'
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.9"
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-    - name: Run RSS generator
-      run: python website2rss.py
+      - name: Verify bundle_rss.json exists
+        run: |
+          if [ ! -f bundle_rss.json ]; then
+            echo "Error: bundle_rss.json not found."
+            exit 1
+          fi
 
-    - name: Verify bundle_rss.json exists
-      run: if [ ! -f bundle_rss.json ]; then echo "Error: bundle_rss.json not found."; exit 1; fi
+      - name: Generate dynamic HTML
+        run: python generate_dynamic_html.py
+        env:
+          GEMMINI_FLASH_API_KEY: ${{ secrets.GEMMINI_FLASH_API_KEY }}
 
-    - name: Generate dynamic HTML
-      run: python generate_dynamic_html.py
-      env:
-        GEMMINI_FLASH_API_KEY: ${{ secrets.GEMMINI_FLASH_API_KEY }}
+      - name: Verify HTML file exists
+        run: |
+          if [ ! -f smart_home_news.html ]; then
+            echo "Error: smart_home_news.html not found."
+            exit 1
+          fi
 
-    - name: Verify HTML file exists
-      run: if [ ! -f smart_home_news.html ]; then echo "Error: smart_home_news.html not found."; exit 1; fi
-
-    - name: Upload HTML artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: smart-home-news
-        path: smart_home_news.html
-        if-no-files-found: warn
-
-    - name: Post to Blogger
-      run: python post_to_blogger.py
-      env:
-        GOOGLE_APPLICATION_CREDENTIALS: secret.json
-
-    - name: Cleanup
-      if: always()
-      run: rm -f secret.json
+      - name: Upload HTML artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: smart-home-news
+          path: smart_home_news.html

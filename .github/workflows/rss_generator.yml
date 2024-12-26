@@ -65,8 +65,8 @@ jobs:
           fi
 
       - name: Log Gemini API Test Result
-        run: echo "Gemini API Test Result: ${{ steps.gemini_api_test.outputs.GEMINI_API_TEST_RESULT }}"
-
+        run: echo 'Gemini API Test Result: ${{ steps.gemini_api_test.outputs.GEMINI_API_TEST_RESULT }}'
+     
       - name: Generate dynamic HTML
         run: python generate_dynamic_html.py
         env:

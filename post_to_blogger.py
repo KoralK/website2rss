@@ -1,46 +1,34 @@
-import os
-import requests
+from google.oauth2.service_account import Credentials
+from googleapiclient.discovery import build
 
-def post_to_blogger(html_content, blogger_api_key, blog_id):
+# Load OAuth credentials
+credentials = Credentials.from_service_account_file('secret.json', scopes=["https://www.googleapis.com/auth/blogger"])
+
+# Build the Blogger API service
+blogger_service = build('blogger', 'v3', credentials=credentials)
+
+def post_to_blogger(blog_id, title, content):
     """
-    Posts the generated HTML content to Blogger.
+    Posts a new blog entry to Blogger using OAuth.
     """
-    url = f"https://www.googleapis.com/blogger/v3/blogs/{blog_id}/posts/"
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {blogger_api_key}"
-    }
-    post_data = {
+    post_body = {
         "kind": "blogger#post",
-        "title": "Latest Smart Home News",
-        "content": html_content
+        "title": title,
+        "content": content
     }
-
     try:
-        response = requests.post(url, headers=headers, json=post_data)
-        response.raise_for_status()
-        print("Post created successfully on Blogger!")
-    except requests.RequestException as e:
+        request = blogger_service.posts().insert(blogId=blog_id, body=post_body)
+        response = request.execute()
+        print(f"Post created successfully: {response['url']}")
+    except Exception as e:
         print(f"Failed to post on Blogger: {e}")
         raise
 
 if __name__ == "__main__":
-    # Read the HTML content from the generated file
-    html_file_name = "smart_home_news.html"
-    blog_id = "7130434432160656322"  # Replace with your Blogger blog ID
+    # Define the Blog ID, title, and content
+    blog_id = '7130434432160656322'  # Replace with your Blog ID
+    title = "Test Post with OAuth"
+    content = "<p>This is a test post created using OAuth authentication in Python.</p>"
 
-    try:
-        with open(html_file_name, "r") as html_file:
-            html_content = html_file.read()
-        
-        blogger_api_key = os.getenv("BLOGGER_API_KEY")
-        if not blogger_api_key:
-            raise ValueError("BLOGGER_API_KEY is not set in the environment.")
-        
-        post_to_blogger(html_content, blogger_api_key, blog_id)
-    except FileNotFoundError:
-        print(f"Error: '{html_file_name}' not found.")
-    except ValueError as ve:
-        print(f"Error: {ve}")
-    except Exception as e:
-        print(f"Unexpected error: {e}")
+    # Post to Blogger
+    post_to_blogger(blog_id, title, content)

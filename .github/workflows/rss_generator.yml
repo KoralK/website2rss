@@ -36,13 +36,13 @@ jobs:
             exit 1
           fi
 
-      - name: Test Gemini API
+            - name: Test Gemini API
         id: gemini_api_test
         run: |
           API_KEY="${{ secrets.GEMMINI_FLASH_API_KEY }}"
           if [ -z "$API_KEY" ]; then
             echo "::error::GEMINI_FLASH_API_KEY secret is not set. Gemini API test will be skipped."
-            echo "GEMINI_API_TEST_RESULT=skipped" >> $GITHUB_OUTPUT
+            echo "GEMINI_API_TEST_RESULT=skipped" >> $GITHUB_ENV
             exit 0
           fi
 
@@ -57,15 +57,15 @@ jobs:
 
           if echo "$RESPONSE" | grep -q "error"; then
             echo "::error::Gemini API test failed. Response: $RESPONSE"
-            echo "GEMINI_API_TEST_RESULT=failed" >> $GITHUB_OUTPUT
+            echo "GEMINI_API_TEST_RESULT=failed" >> $GITHUB_ENV
             exit 1
           else
             echo "Gemini API test successful. Response: $RESPONSE"
-            echo "GEMINI_API_TEST_RESULT=success" >> $GITHUB_OUTPUT
+            echo "GEMINI_API_TEST_RESULT=success" >> $GITHUB_ENV
           fi
-
+          
       - name: Log Gemini API Test Result
-        run: echo 'Gemini API Test Result: ${{ steps.gemini_api_test.outputs.GEMINI_API_TEST_RESULT }}'
+        run: echo "Gemini API Test Result: ${{ steps.gemini_api_test.outputs.GEMINI_API_TEST_RESULT }}"
      
       - name: Generate dynamic HTML
         run: python generate_dynamic_html.py

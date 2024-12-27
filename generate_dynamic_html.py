@@ -28,8 +28,8 @@ def generate_dynamic_html(json_data, api_key):
     try:
         # Using the GenerativeModel class for generating content
         model = genai.GenerativeModel("gemini-1.5-flash")
-        response = model.generate_content(prompt=prompt)
-        return response["text"]
+        response = model.generate_content([prompt])  # Pass prompt as a list
+        return response["text"]  # Ensure the response structure matches
     except Exception as e:
         print(f"Error generating HTML: {e}")
         raise

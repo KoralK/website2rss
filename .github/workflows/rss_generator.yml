@@ -88,7 +88,7 @@ jobs:
         with:
           name: smart-home-news
           path: smart_home_news.html
-          
+
   post_to_blogger:
     runs-on: ubuntu-latest
     steps:
@@ -106,6 +106,6 @@ jobs:
           pip install -r requirements.txt
 
       - name: Choose Blog and Post
-        run: python choose_blog_and_post.py
+        run: python post2blogger.py
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}

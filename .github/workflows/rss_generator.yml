@@ -15,7 +15,8 @@ jobs:
           API_KEY="${{ secrets.GEMMINI_FLASH_API_KEY }}"
           if [ -z "$API_KEY" ]; then
             echo "::error::GEMINI_FLASH_API_KEY secret is not set. Gemini API test will be skipped."
-            echo "GEMINI_API_TEST_RESULT=skipped" >> $GITHUB_ENV
+            # Step output'a yazıyoruz, dikkat!
+            echo "GEMINI_API_TEST_RESULT=skipped" >> $GITHUB_OUTPUT
             exit 0
           fi
 
@@ -30,19 +31,17 @@ jobs:
 
           if echo "$RESPONSE" | grep -q "error"; then
             echo "::error::Gemini API test failed. Response: $RESPONSE"
-            echo "GEMINI_API_TEST_RESULT=failed" >> $GITHUB_ENV
+            echo "GEMINI_API_TEST_RESULT=failed" >> $GITHUB_OUTPUT
             exit 1
           else
             echo "Gemini API test successful. Response: $RESPONSE"
-            echo "GEMINI_API_TEST_RESULT=success" >> $GITHUB_ENV
+            echo "GEMINI_API_TEST_RESULT=success" >> $GITHUB_OUTPUT
           fi
-        outputs:
-          GEMINI_API_TEST_RESULT: ${{ env.GEMINI_API_TEST_RESULT }}
 
       - name: Log Gemini API Test Result
         run: |
           echo "Gemini API Test Result: ${{ steps.gemini_api_test.outputs.GEMINI_API_TEST_RESULT }}"
-    
+
       - name: Checkout code
         uses: actions/checkout@v3
 

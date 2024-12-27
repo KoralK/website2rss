@@ -88,6 +88,8 @@ jobs:
         with:
           name: smart-home-news
           path: smart_home_news.html
+      - name: Debug environment
+        run: env
 
   post_to_blogger:
     runs-on: ubuntu-latest
@@ -109,14 +111,12 @@ jobs:
       - name: Create secret.json dynamically
         run: |
           echo "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}" > secret.json
+          python -m json.tool secret.json > temp.json && mv temp.json secret.json
 
       - name: Run Blogger Post Script
         run: python post2blogger.py
         env:
           GOOGLE_APPLICATION_CREDENTIALS: secret.json
-
-      - name: Debug environment
-        run: env
 
       - name: Debug credentials file
         run: cat secret.json

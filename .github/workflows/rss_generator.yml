@@ -36,7 +36,7 @@ jobs:
             exit 1
           fi
 
-      - name: Test Gemini API
+            - name: Test Gemini API
         id: gemini_api_test
         run: |
           API_KEY="${{ secrets.GEMMINI_FLASH_API_KEY }}"
@@ -66,7 +66,8 @@ jobs:
 
         outputs:
           GEMINI_API_TEST_RESULT: ${{ env.GEMINI_API_TEST_RESULT }}
-          
+
+      - name: Log Gemini API Test Result
         run: echo "Gemini API Test Result: ${{ steps.gemini_api_test.outputs.GEMINI_API_TEST_RESULT }}"
      
       - name: Generate dynamic HTML

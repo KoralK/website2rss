@@ -109,3 +109,9 @@ jobs:
         run: python post2blogger.py
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+      
+      - name: Debug environment
+        run: env
+
+      - name: Debug credentials file
+        run: cat secret.json

@@ -8,8 +8,41 @@ on:
 jobs:
   generate_rss:
     runs-on: ubuntu-latest
-
     steps:
+      - name: Test Gemini API
+        id: gemini_api_test
+        run: |
+          API_KEY="${{ secrets.GEMMINI_FLASH_API_KEY }}"
+          if [ -z "$API_KEY" ]; then
+            echo "::error::GEMINI_FLASH_API_KEY secret is not set. Gemini API test will be skipped."
+            echo "GEMINI_API_TEST_RESULT=skipped" >> $GITHUB_ENV
+            exit 0
+          fi
+
+          RESPONSE=$(curl -s "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=$API_KEY" \
+          -H 'Content-Type: application/json' \
+          -X POST \
+          -d '{
+            "contents": [{
+              "parts":[{"text": "Explain how AI works"}]
+            }]
+          }')
+
+          if echo "$RESPONSE" | grep -q "error"; then
+            echo "::error::Gemini API test failed. Response: $RESPONSE"
+            echo "GEMINI_API_TEST_RESULT=failed" >> $GITHUB_ENV
+            exit 1
+          else
+            echo "Gemini API test successful. Response: $RESPONSE"
+            echo "GEMINI_API_TEST_RESULT=success" >> $GITHUB_ENV
+          fi
+        outputs:
+          GEMINI_API_TEST_RESULT: ${{ env.GEMINI_API_TEST_RESULT }}
+
+      - name: Log Gemini API Test Result
+        run: |
+          echo "Gemini API Test Result: ${{ steps.gemini_api_test.outputs.GEMINI_API_TEST_RESULT }}"
+    
       - name: Checkout code
         uses: actions/checkout@v3
 
@@ -35,41 +68,7 @@ jobs:
             echo "Error: bundle_rss.json not found."
             exit 1
           fi
-
-            - name: Test Gemini API
-        id: gemini_api_test
-        run: |
-          API_KEY="${{ secrets.GEMMINI_FLASH_API_KEY }}"
-          if [ -z "$API_KEY" ]; then
-            echo "::error::GEMINI_FLASH_API_KEY secret is not set. Gemini API test will be skipped."
-            echo "GEMINI_API_TEST_RESULT=skipped" >> $GITHUB_ENV
-            exit 0
-          fi
-
-          RESPONSE=$(curl -s "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=$API_KEY" \
-          -H 'Content-Type: application/json' \
-          -X POST \
-          -d '{
-            "contents": [{
-              "parts":[{"text": "Explain how AI works"}]
-              }]
-            }')
-
-          if echo "$RESPONSE" | grep -q "error"; then
-            echo "::error::Gemini API test failed. Response: $RESPONSE"
-            echo "GEMINI_API_TEST_RESULT=failed" >> $GITHUB_ENV
-            exit 1
-          else
-            echo "Gemini API test successful. Response: $RESPONSE"
-            echo "GEMINI_API_TEST_RESULT=success" >> $GITHUB_ENV
-          fi
-
-        outputs:
-          GEMINI_API_TEST_RESULT: ${{ env.GEMINI_API_TEST_RESULT }}
-
-      - name: Log Gemini API Test Result
-        run: echo "Gemini API Test Result: ${{ steps.gemini_api_test.outputs.GEMINI_API_TEST_RESULT }}"
-     
+      
       - name: Generate dynamic HTML
         run: python generate_dynamic_html.py
         env:

@@ -23,7 +23,7 @@ jobs:
       - name: Test Gemini API
         id: gemini_api_test
         run: |
-          API_KEY="${{ secrets.GEMMINI_FLASH_API_KEY }}"
+          API_KEY="${{ secrets.GEMINI_FLASH_API_KEY }}"
           if [ -z "$API_KEY" ]; then
             echo "::error::GEMINI_FLASH_API_KEY secret is not set. Gemini API test will be skipped."
             echo "GEMINI_API_TEST_RESULT=skipped" >> $GITHUB_OUTPUT
@@ -74,7 +74,7 @@ jobs:
       - name: Generate dynamic HTML
         run: python generate_dynamic_html.py
         env:
-          GEMMINI_FLASH_API_KEY: ${{ secrets.GEMMINI_FLASH_API_KEY }}
+          GEMMINI_FLASH_API_KEY: ${{ secrets.GEMINI_FLASH_API_KEY }}
 
       - name: Verify HTML file exists
         run: |

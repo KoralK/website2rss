@@ -11,7 +11,7 @@ def generate_dynamic_html(json_data, api_key):
         api_key (str): The Gemini API key.
 
     Returns:
-       str: The generated HTML content.
+        str: The generated HTML content.
     Raises:
         Exception: If HTML generation fails.
     """
@@ -26,7 +26,7 @@ def generate_dynamic_html(json_data, api_key):
 
     # Generate HTML using Gemini API
     try:
-        response = genai.generate_text(
+        response = genai.generate_content(
             model="gemini-2.0-flash-exp",
             prompt=prompt
         )

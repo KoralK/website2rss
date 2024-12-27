@@ -122,8 +122,9 @@ jobs:
           
       - name: Create secret.json
         run: |
-          echo "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}" > secret.json
+          echo "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}" | sed 's/\\n/\/g' > secret.json
           python -m json.tool secret.json > temp.json && mv temp.json secret.json
+
       
       - name: Verify secret.json exists
         run: |

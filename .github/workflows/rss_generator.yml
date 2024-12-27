@@ -20,6 +20,10 @@ jobs:
 
       - name: Install dependencies
         run: python -m pip install --upgrade pip requests
+      - name: Generate dynamic HTML
+        run: python generate_dynamic_html.py
+        env:
+          MAKE_COM_WEBHOOK_URL: ${{ secrets.MAKE_COM_WEBHOOK_URL }}
 
       - name: Verify HTML file exists
         run: |

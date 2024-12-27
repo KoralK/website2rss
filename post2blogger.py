@@ -2,48 +2,65 @@ import os
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 
-# Load credentials and initialize Blogger API
-credentials = Credentials.from_service_account_file('secret.json', scopes=["https://www.googleapis.com/auth/blogger"])
-blogger_service = build('blogger', 'v3', credentials=credentials)
+
+def initialize_blogger_service():
+    """
+    Initialize the Blogger API service using credentials from a file.
+    """
+    credentials = Credentials.from_service_account_file(
+        'secret.json', scopes=["https://www.googleapis.com/auth/blogger"]
+    )
+    return build('blogger', 'v3', credentials=credentials)
 
 
-def list_blogs():
+def list_blogs(blogger_service):
     """
-    Lists all blogs for the authenticated user.
+    List all blogs for the authenticated user.
     """
-    blogs = blogger_service.blogs().listByUser(userId="self").execute()
-    print("\nAvailable Blogs:")
-    for idx, blog in enumerate(blogs["items"], start=1):
-        print(f"{idx}. {blog['name']} (ID: {blog['id']})")
-    return blogs["items"]
+    try:
+        blogs = blogger_service.blogs().listByUser(userId="self").execute()
+        print("\nAvailable Blogs:")
+        for idx, blog in enumerate(blogs["items"], start=1):
+            print(f"{idx}. {blog['name']} (ID: {blog['id']})")
+        return blogs["items"]
+    except Exception as e:
+        print(f"Error fetching blogs: {e}")
+        raise
 
 
-def post_to_blogger(blog_id, title, content):
+def map_post_parameters(blog_id, title, content, status="live", labels=None, location=None):
     """
-    Posts a new blog entry to Blogger using OAuth.
+    Map the post parameters to a structure suitable for the Blogger API.
     """
-    post_body = {
+    return {
         "kind": "blogger#post",
         "title": title,
-        "content": content
+        "content": content,
+        "status": status,
+        "labels": labels or [],
+        "location": location or {"name": "", "lat": "", "lng": "", "span": "1,1"}
     }
+
+
+def post_to_blogger(blogger_service, blog_id, title, content, status="live", labels=None, location=None):
+    """
+    Create a new post in Blogger.
+    """
+    post_body = map_post_parameters(blog_id, title, content, status, labels, location)
     try:
-        request = blogger_service.posts().insert(blogId=blog_id, body=post_body)
-        response = request.execute()
+        response = blogger_service.posts().insert(blogId=blog_id, body=post_body).execute()
         print(f"Post created successfully: {response['url']}")
     except Exception as e:
-        print(f"Failed to post on Blogger: {e}")
+        print(f"Failed to post to Blogger: {e}")
         raise
 
 
 def main():
-    blogs = list_blogs()
+    blogger_service = initialize_blogger_service()
+    blogs = list_blogs(blogger_service)
+    
     blog_choices = {str(idx): blog for idx, blog in enumerate(blogs, start=1)}
-
-    choice = input("\nChoose a blog by number (or type 'new' to create a new blog): ")
-    if choice == "new":
-        print("Blog creation not implemented yet.")
-        return
+    choice = input("\nChoose a blog by number: ")
 
     if choice not in blog_choices:
         print("Invalid choice. Exiting.")
@@ -52,18 +69,12 @@ def main():
     selected_blog = blog_choices[choice]
     print(f"You selected: {selected_blog['name']} (ID: {selected_blog['id']})")
 
-    action = input("Do you want to (1) overwrite an existing post or (2) create a new post? [1/2]: ")
-    if action == "1":
-        print("Overwriting an existing post is not implemented yet.")
-    elif action == "2":
-        # Define the title and content (can be dynamically passed from other scripts)
-        title = "Generated Post Title"
-        with open("smart_home_news.html", "r") as html_file:
-            content = html_file.read()
+    # Define title and content (can be dynamically passed)
+    title = "Generated Post Title"
+    with open("smart_home_news.html", "r") as html_file:
+        content = html_file.read()
 
-        post_to_blogger(selected_blog['id'], title, content)
-    else:
-        print("Invalid action. Exiting.")
+    post_to_blogger(blogger_service, selected_blog['id'], title, content)
 
 
 if __name__ == "__main__":

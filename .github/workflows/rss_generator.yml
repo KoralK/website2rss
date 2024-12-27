@@ -119,16 +119,26 @@ jobs:
       
       - name: Debug environment
         run: env
+          
+      - name: Create secret.json
+        run: |
+          echo "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}" > secret.json
+          python -m json.tool secret.json > temp.json && mv temp.json secret.json
+      
+      - name: Verify secret.json exists
+        run: |
+          if [ ! -f secret.json ]; then
+            echo "Error: secret.json was not created."
+            exit 1
+          fi
+      
+      - name: List files
+        run: ls -la
 
       - name: Run Blogger Post Script
         run: python post2blogger.py
         env:
           GOOGLE_APPLICATION_CREDENTIALS: secret.json
-      
-      - name: Create secret.json
-        run: |
-          echo "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}" > secret.json
-          python -m json.tool secret.json > temp.json && mv temp.json secret.json
 
       - name: Debug credentials file
         run: cat secret.json

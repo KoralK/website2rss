@@ -44,7 +44,7 @@ if __name__ == "__main__":
         print("JSON data loaded successfully.")
 
         # Retrieve API key from environment
-        gemini_api_key = os.getenv("GEMINI_FLASH_API_KEY")
+        gemini_api_key = os.getenv("GEMMINI_FLASH_API_KEY")
         if not gemini_api_key:
             raise ValueError("GEMINI_FLASH_API_KEY is not set in the environment.")
 

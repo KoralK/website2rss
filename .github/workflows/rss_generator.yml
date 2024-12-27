@@ -1,4 +1,4 @@
-name: Generate and Post to Blogger
+name: Push HTML to Make.com Webhook
 
 on:
   push:
@@ -6,8 +6,9 @@ on:
       - main
 
 jobs:
-  generate_and_post:
+  push_html:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -18,34 +19,18 @@ jobs:
           python-version: "3.9"
 
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+        run: python -m pip install --upgrade pip requests
 
-      - name: Create secret.json
-        run: |
-          echo "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}" > secret.json
-          python -m json.tool secret.json > temp.json && mv temp.json secret.json
-
-      - name: Verify secret.json
-        run: |
-          if [ ! -f secret.json ]; then
-            echo "Error: secret.json not created."
-            exit 1
-          fi
-          echo "secret.json created successfully."
-
-      - name: Generate Dynamic HTML
-        run: python generate_dynamic_html.py
-
-      - name: Verify Generated HTML
+      - name: Verify HTML file exists
         run: |
           if [ ! -f smart_home_news.html ]; then
             echo "Error: smart_home_news.html not found."
             exit 1
           fi
 
-      - name: Post to Blogger
-        run: python post2blogger.py
-        env:
-          GOOGLE_APPLICATION_CREDENTIALS: secret.json
+      - name: Push HTML to Make.com Webhook
+        run: |
+          curl -X POST \
+            -H "Content-Type: text/html" \
+            --data-binary @smart_home_news.html \
+            "${{ secrets.MAKE_COM_WEBHOOK_URL }}"

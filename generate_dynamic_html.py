@@ -1,68 +1,49 @@
 import os
-import google.generativeai as genai
 import json
+import requests
 
-def generate_dynamic_html(json_data, api_key):
+def push_html_to_webhook(html_content, webhook_url):
     """
-    Generates dynamic HTML content using the Gemini API.
+    Pushes the generated HTML content to the Make.com webhook.
 
     Args:
-        json_data (dict): JSON data for HTML generation.
-        api_key (str): The Gemini API key.
+        html_content (str): The HTML content to send.
+        webhook_url (str): The Make.com webhook URL.
 
     Returns:
-        str: The generated HTML content.
-    Raises:
-        Exception: If HTML generation fails.
+        Response object from the POST request.
     """
-
-    # Configure the Gemini API client
-    genai.configure(api_key=api_key)
-
-    # Convert JSON data to a suitable prompt format
-    prompt = (
-        "Generate a dynamic HTML page for smart home device news "
-        "with a responsive design. JSON data: " + json.dumps(json_data)
-    )
-
     try:
-        # Using the GenerativeModel class for generating content
-        model = genai.GenerativeModel("gemini-1.5-flash")
-        response = model.generate_content([prompt])  # returns a GenerateContentResponse object
-
-        # Extract the text from the response
-        # e.g. get the text of the first candidate (first part):
-        generated_html = response.candidates[0].content.parts[0].text
-
-        return generated_html
-
-    except Exception as e:
-        print(f"Error generating HTML: {e}")
+        response = requests.post(
+            webhook_url,
+            data={"html_content": html_content},
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+        )
+        response.raise_for_status()
+        print("HTML content successfully sent to webhook.")
+        return response
+    except requests.RequestException as e:
+        print(f"Error sending HTML to webhook: {e}")
         raise
 
 if __name__ == "__main__":
     try:
-        json_file_name = "bundle_rss.json"
-        with open(json_file_name, "r") as json_file:
-            json_data = json.load(json_file)
-        print("JSON data loaded successfully.")
-
-        gemini_api_key = os.getenv("GEMINI_FLASH_API_KEY")
-        if not gemini_api_key:
-            raise ValueError("GEMINI_FLASH_API_KEY is not set in the environment.")
-
-        # Generate the HTML
-        print("Generating HTML...")
-        dynamic_html = generate_dynamic_html(json_data, gemini_api_key)
-
-        # Save the HTML to a file
+        # Load generated HTML from file
         html_file_name = "smart_home_news.html"
-        with open(html_file_name, "w") as html_file:
-            html_file.write(dynamic_html)
-        print(f"HTML file '{html_file_name}' created successfully.")
+        with open(html_file_name, "r") as html_file:
+            html_content = html_file.read()
+        print(f"HTML file '{html_file_name}' loaded successfully.")
+
+        # Get Make.com webhook URL from environment variable
+        webhook_url = os.getenv("MAKE_COM_WEBHOOK_URL")
+        if not webhook_url:
+            raise ValueError("MAKE_COM_WEBHOOK_URL is not set in the environment.")
+
+        # Push the HTML content to Make.com
+        push_html_to_webhook(html_content, webhook_url)
 
     except FileNotFoundError:
-        print(f"Error: '{json_file_name}' not found. Ensure the RSS generation step completed successfully.")
+        print(f"Error: HTML file '{html_file_name}' not found.")
     except ValueError as ve:
         print(f"Error: {ve}")
     except Exception as e:

@@ -74,7 +74,7 @@ jobs:
       - name: Generate dynamic HTML
         run: python generate_dynamic_html.py
         env:
-          GEMMINI_FLASH_API_KEY: ${{ secrets.GEMINI_FLASH_API_KEY }}
+          GEMINI_FLASH_API_KEY: ${{ secrets.GEMINI_FLASH_API_KEY }}
 
       - name: Verify HTML file exists
         run: |

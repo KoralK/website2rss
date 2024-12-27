@@ -26,11 +26,10 @@ def generate_dynamic_html(json_data, api_key):
 
     # Generate HTML using Gemini API
     try:
-        response = genai.generate_content(
-            model="gemini-2.0-flash-exp",
-            prompt=prompt
-        )
-        return response.result
+        # Using the GenerativeModel class for generating content
+        model = genai.GenerativeModel("gemini-1.5-flash")
+        response = model.generate_content(prompt=prompt)
+        return response["text"]
     except Exception as e:
         print(f"Error generating HTML: {e}")
         raise
@@ -44,7 +43,7 @@ if __name__ == "__main__":
         print("JSON data loaded successfully.")
 
         # Retrieve API key from environment
-        gemini_api_key = os.getenv("GEMMINI_FLASH_API_KEY")
+        gemini_api_key = os.getenv("GEMINI_FLASH_API_KEY")
         if not gemini_api_key:
             raise ValueError("GEMINI_FLASH_API_KEY is not set in the environment.")
 

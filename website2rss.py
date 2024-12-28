@@ -1,10 +1,9 @@
 import os
 import json
-from sendhtml import push_html_to_webhook
 
 def fetch_rss_data():
     """
-    Placeholder function to fetch RSS data from various sources.
+    Fetches RSS data from various sources.
     Replace this with actual implementation to fetch RSS feeds.
     """
     # Example RSS data structure
@@ -46,30 +45,16 @@ def save_html(data, filename="smart_home_news.html"):
 
 if __name__ == "__main__":
     try:
-        # Fetch RSS data
+        # Step 1: Fetch RSS data
         new_data = fetch_rss_data()
         print("Fetched RSS data successfully.")
 
-        # Filter smart home-related data
+        # Step 2: Filter smart home-related data
         filtered_data = filter_smart_home_data(new_data)
         print("Filtered RSS data successfully.")
 
-        # Save filtered data as HTML
+        # Step 3: Save filtered data as HTML
         save_html(filtered_data, "smart_home_news.html")
-
-        # Push the generated HTML to Make.com webhook
-        html_file_name = "smart_home_news.html"
-        with open(html_file_name, "r") as html_file:
-            html_content = html_file.read()
-        print(f"HTML file '{html_file_name}' loaded successfully.")
-
-        # Get Make.com webhook URL from environment variable
-        webhook_url = os.getenv("MAKE_COM_WEBHOOK_URL")
-        if not webhook_url:
-            raise ValueError("MAKE_COM_WEBHOOK_URL is not set in the environment.")
-
-        # Push the HTML content to Make.com
-        push_html_to_webhook(html_content, webhook_url)
 
     except Exception as e:
         print(f"Error: {e}")

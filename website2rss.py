@@ -1,6 +1,6 @@
 import os
 import json
-from generate_dynamic_html import push_html_to_webhook
+from sendhtml import push_html_to_webhook
 
 # Save filtered RSS data as HTML
 def save_html(data, filename="smart_home_news.html"):

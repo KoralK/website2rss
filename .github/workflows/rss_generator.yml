@@ -24,8 +24,8 @@ jobs:
       - name: Install dependencies
         run: python -m pip install --upgrade pip requests beautifulsoup4
 
-      # Step 4: Generate RSS JSON and HTML
-      - name: Generate RSS and HTML
+      # Step 4: Run the website2rss script
+      - name: Generate RSS JSON and HTML
         run: python website2rss.py
         env:
           MAKE_COM_WEBHOOK_URL: ${{ secrets.MAKE_COM_WEBHOOK_URL }}
@@ -44,4 +44,4 @@ jobs:
           curl -X POST \
             -H "Content-Type: text/html" \
             --data-binary @smart_home_news.html \
-            "${{ secrets.MAKE_COM_HTML_WEBHOOK_URL }}"
+            "${{ secrets.MAKE_COM_WEBHOOK_URL }}"

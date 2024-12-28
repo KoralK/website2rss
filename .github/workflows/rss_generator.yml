@@ -22,7 +22,7 @@ jobs:
 
       # Step 3: Install dependencies
       - name: Install dependencies
-        run: python -m pip install --upgrade pip requests
+        run: python -m pip install --upgrade pip requests feedparser
 
       # Step 4: Run the website2rss script
       - name: Push RSS data to Make.com Webhook
